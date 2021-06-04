@@ -1,0 +1,6 @@
+API/
+node_modules/
+dist/
+build/
+roms/
+.vscode/
