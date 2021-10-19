@@ -20,6 +20,7 @@ import { bus } from "modloader64_api/EventHandler";
 import { ModLoaderErrorCodes } from "modloader64_api/ModLoaderErrorCodes";
 import { IRomMemory } from "modloader64_api/IRomMemory";
 import { FakeRom } from 'modloader64_api/SidedProxy/FakeMemory';
+import { IHiResTexture } from "modloader64_api/IHiResTexture";
 
 export default class Gamecube implements IConsole {
 
@@ -72,6 +73,10 @@ export default class Gamecube implements IConsole {
             process.exit(ModLoaderErrorCodes.NO_ROM);
         }
         this.iso = fs.readFileSync(this.rom);
+    }
+
+    getHiResTextureAccess(): IHiResTexture {
+        return {} as any;
     }
 
     getInternalPlugin(): string {

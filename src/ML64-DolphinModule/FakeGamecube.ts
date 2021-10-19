@@ -13,6 +13,7 @@ import { FakeMemory, FakeRom } from 'modloader64_api/SidedProxy/FakeMemory';
 import { ILogger } from 'modloader64_api/IModLoaderAPI';
 import { IRomMemory } from 'modloader64_api/IRomMemory';
 import { GCRomHeader } from './GCRomHeader';
+import { IHiResTexture } from 'modloader64_api/IHiResTexture';
 
 export class FakeGamecube implements IConsole {
     rom: string;
@@ -24,6 +25,10 @@ export class FakeGamecube implements IConsole {
         this.rom = rom;
         this.rom_data = Buffer.alloc(1);
         this.ram = new FakeMemory();
+    }
+
+    getHiResTextureAccess(): IHiResTexture {
+        return this.dummy;
     }
 
     getRomAccess(): IRomMemory {

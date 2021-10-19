@@ -10,6 +10,39 @@ export class DolphinMemoryWrapper implements IMemory, IRomMemory {
         this.dolphin = emu;
     }
 
+    /** @todo implement these */
+    rdramRead64(addr: number): number {
+        throw new Error("Method not implemented.");
+    }
+
+    rdramReadS64(addr: number): number {
+        throw new Error("Method not implemented.");
+    }
+
+    rdramReadF64(addr: number): number {
+        throw new Error("Method not implemented.");
+    }
+
+    rdramWrite64(addr: number, val: number): void {
+        throw new Error("Method not implemented.");
+    }
+
+    rdramWriteF64(addr: number, val: number): void {
+        throw new Error("Method not implemented.");
+    }
+
+    rdramReadBigInt64(addr: number): BigInt {
+        throw new Error("Method not implemented.");
+    }
+
+    rdramReadBigIntS64(addr: number): BigInt {
+        throw new Error("Method not implemented.");
+    }
+
+    rdramWriteBigInt64(addr: number, val: BigInt): void {
+        throw new Error("Method not implemented.");
+    }
+    
     romRead8(addr: number): number {
         return 0;
     }
