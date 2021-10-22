@@ -15,6 +15,11 @@ import { SDL } from "modloader64_api/Sylvain/SDL";
 import { IYaz0 } from "modloader64_api/Sylvain/Yaz0";
 import path from "path";
 import fs from 'fs';
+import { EmptyConsole } from "./EmptyConsole";
+
+interface DummyConfig{
+    DummyMupen: boolean;
+}
 
 export abstract class DummyMupen implements IConsole {
 
@@ -22,9 +27,16 @@ export abstract class DummyMupen implements IConsole {
 
     constructor(logger: ILogger, lobby: string, config: IConfig) {
         // Sketchy shit
-        let _md = require(path.resolve('./src/modloader/consoles/mupen/MupenDescriptor.js')).MupenDescriptor;
-        let md: IConsoleDescriptor = new _md();
-        this.lolMupen = md.constructConsole(ProxySide.CLIENT, "./emulator/mupen64plus.v64", logger, lobby, config);
+        let c: DummyConfig = config.registerConfigCategory("DolphinBinding") as DummyConfig;
+        config.setData("DolphinBinding", "DummyMupen", true);
+        config.save();
+        if (c.DummyMupen){
+            let _md = require(path.resolve('./src/modloader/consoles/mupen/MupenDescriptor.js')).MupenDescriptor;
+            let md: IConsoleDescriptor = new _md();
+            this.lolMupen = md.constructConsole(ProxySide.CLIENT, "./emulator/mupen64plus.v64", logger, lobby, config);
+        }else{
+            this.lolMupen = new EmptyConsole();
+        }
     }
 
     startEmulator(preStartCallback: Function): IMemory {
