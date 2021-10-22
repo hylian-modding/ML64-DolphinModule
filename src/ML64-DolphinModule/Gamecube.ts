@@ -82,7 +82,7 @@ export default class Gamecube extends DummyMupen {
     }
 
     getInternalPlugin(): string {
-        return "";
+        return this.lolMupen.getInternalPlugin();
     }
 
     getRomAccess(): IRomMemory {
