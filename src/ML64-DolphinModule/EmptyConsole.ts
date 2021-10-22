@@ -117,7 +117,7 @@ export class EmptyConsole implements IConsole {
     }
 
     getInternalPlugin(): string {
-        return {} as any;
+        return "";
     }
 
     getRomAccess(): IRomMemory {
