@@ -10,7 +10,7 @@ import { Gfx } from 'modloader64_api/Sylvain/Gfx';
 import { SDL } from 'modloader64_api/Sylvain/SDL';
 import { IImGui } from 'modloader64_api//Sylvain/ImGui';
 import { FakeMemory, FakeRom } from 'modloader64_api/SidedProxy/FakeMemory';
-import { ILogger } from 'modloader64_api/IModLoaderAPI';
+import { IConfig, ILogger } from 'modloader64_api/IModLoaderAPI';
 import { IRomMemory } from 'modloader64_api/IRomMemory';
 import { GCRomHeader } from './GCRomHeader';
 import { IHiResTexture } from 'modloader64_api/IHiResTexture';
@@ -21,7 +21,7 @@ export class FakeGamecube implements IConsole {
     ram: FakeMemory;
     dummy: any = {};
 
-    constructor(rom: string, logger: ILogger, lobby: string) {
+    constructor(rom: string, logger: ILogger, lobby: string, config: IConfig) {
         this.rom = rom;
         this.rom_data = Buffer.alloc(1);
         this.ram = new FakeMemory();

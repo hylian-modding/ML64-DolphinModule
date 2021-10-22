@@ -1,5 +1,5 @@
 import IConsole, { IConsoleDescriptor } from "modloader64_api/IConsole";
-import { ILogger } from "modloader64_api/IModLoaderAPI";
+import { IConfig, ILogger } from "modloader64_api/IModLoaderAPI";
 import { ProxySide } from "modloader64_api/SidedProxy/SidedProxy";
 import { FakeGamecube } from "./FakeGamecube";
 import moduleAlias from 'module-alias';
@@ -22,13 +22,13 @@ export default class DolphinDescriptor implements IConsoleDescriptor {
         }
     }
 
-    constructConsole(side: ProxySide, rom: string, logger: ILogger, lobby: string): IConsole {
+    constructConsole(side: ProxySide, rom: string, logger: ILogger, lobby: string, config: IConfig): IConsole {
         switch (side) {
             case ProxySide.CLIENT:
                 let binding: any = require(path.resolve(__dirname, "Gamecube.js")).default;
-                return new binding(rom, logger, lobby);
+                return new binding(rom, logger, lobby, config);
             case ProxySide.SERVER:
-                return new FakeGamecube(rom, logger, lobby);
+                return new FakeGamecube(rom, logger, lobby, config);
             default:
                 return {} as any;
         }

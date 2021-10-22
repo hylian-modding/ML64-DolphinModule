@@ -1,6 +1,6 @@
 import IConsole from "modloader64_api/IConsole";
 import IMemory from "modloader64_api/IMemory";
-import { ILogger } from "modloader64_api/IModLoaderAPI";
+import { IConfig, ILogger } from "modloader64_api/IModLoaderAPI";
 import { IRomHeader } from "modloader64_api/IRomHeader";
 import ISaveState from "modloader64_api/ISaveState";
 import IUtils from "modloader64_api/IUtils";
@@ -21,8 +21,9 @@ import { ModLoaderErrorCodes } from "modloader64_api/ModLoaderErrorCodes";
 import { IRomMemory } from "modloader64_api/IRomMemory";
 import { FakeRom } from 'modloader64_api/SidedProxy/FakeMemory';
 import { IHiResTexture } from "modloader64_api/IHiResTexture";
+import { DummyMupen } from "./DummyMupen";
 
-export default class Gamecube implements IConsole {
+export default class Gamecube extends DummyMupen {
 
     mod: Dolphin;
     rom: string;
@@ -32,7 +33,8 @@ export default class Gamecube implements IConsole {
     iso: Buffer;
     logger: ILogger;
 
-    constructor(rom: string, logger: ILogger, lobby: string) {
+    constructor(rom: string, logger: ILogger, lobby: string, config: IConfig) {
+        super(logger, lobby, config);
         this.logger = logger;
         this.mod = new Dolphin({
             // Qt app metadata, mostly used when storing settings via QSetting
@@ -88,6 +90,7 @@ export default class Gamecube implements IConsole {
     }
 
     startEmulator(preStartCallback: Function): IMemory {
+        super.startEmulator(()=>{});
         preStartCallback();
         this.mod.start({
             path: this.rom,
@@ -101,12 +104,15 @@ export default class Gamecube implements IConsole {
     }
 
     stopEmulator(): void {
+        super.stopEmulator();
     }
 
     softReset(): void {
+        super.softReset();
     }
 
     hardReset(): void {
+        super.hardReset();
     }
 
     saveState(file: string): void {
@@ -119,7 +125,7 @@ export default class Gamecube implements IConsole {
     }
 
     isEmulatorReady(): boolean {
-        return true;
+        return super.isEmulatorReady();
     }
 
     getLoadedRom(): Buffer {
@@ -145,9 +151,11 @@ export default class Gamecube implements IConsole {
     }
 
     pauseEmulator(): void {
+        super.pauseEmulator();
     }
 
     resumeEmulator(): void {
+        super.resumeEmulator();
     }
 
     getMemoryAccess(): IMemory {
@@ -158,7 +166,7 @@ export default class Gamecube implements IConsole {
     }
 
     getUtils(): IUtils {
-        return {} as any;
+        return super.getUtils();
     }
 
     getSaveStateManager(): ISaveState {
@@ -177,23 +185,23 @@ export default class Gamecube implements IConsole {
     }
 
     getImGuiAccess(): IImGui {
-        return {} as any;
+        return super.getImGuiAccess();
     }
 
     getSDLAccess(): SDL {
-        return {} as any;
+        return super.getSDLAccess();
     }
 
     getGfxAccess(): Gfx {
-        return {} as any;
+        return super.getGfxAccess();
     }
 
     getInputAccess(): Input {
-        return {} as any;
+        return super.getInputAccess();
     }
 
     getYaz0Encoder(): IYaz0 {
-        return {} as any;
+        return super.getYaz0Encoder();
     }
 
     getDebuggerAccess(): Debugger {
