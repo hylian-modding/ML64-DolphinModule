@@ -199,7 +199,8 @@ export class DolphinMemoryWrapper implements IMemory, IRomMemory {
     getRdramBuffer(): Buffer {
         return Buffer.alloc(1);
     }
-    invalidateCachedCode(): void {
+    invalidateCachedCode(address?: number, size?: number, forced?: boolean): void {
+        this.dolphin.JitInterface.invalidateICache(address!, size!, forced!);
     }
 
 }
