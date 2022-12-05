@@ -10,7 +10,7 @@ import { IImGui } from 'modloader64_api/Sylvain/ImGui';
 import { Input } from 'modloader64_api/Sylvain/Input';
 import { SDL } from 'modloader64_api/Sylvain/SDL';
 import { IYaz0 } from 'modloader64_api/Sylvain/Yaz0';
-import { Dolphin, Config, Core, Gui, AddressSpace, State, Enums } from 'dolphin-js';
+import { Dolphin, Config, Core, Gui, AddressSpace, State, Enums, Util, UICommon } from 'dolphin-js';
 import { ImGuiApp } from './ImGuiApp';
 import path from 'path';
 import { FakeRom } from 'modloader64_api/SidedProxy/FakeMemory';
@@ -102,6 +102,10 @@ export default class DolphinConsole implements IConsole {
         this.lobby = lobby;
 
         this.mem = new DolphinMemory();
+
+        bus.on("DOLPHIN_ENABLE_PATCH", (evt: any)=>{
+            Util.enablePatch(new UICommon.GameFile(rom), evt);
+        });
 
     }
 
