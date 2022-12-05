@@ -44,7 +44,9 @@ export class DolphinMemory implements IMemory {
         return Buffer.from(Memory.readBitsBufferU8(addr, bytes));
     }
     rdramReadBits8(addr: number): Buffer {
-        return Buffer.from(bitwise.byte.read(this.rdramRead8(addr) as any));
+        //return Buffer.from(bitwise.byte.read(this.rdramRead8(addr) as any));
+
+        return Buffer.from(Memory.readBitsU8(addr));
     }
     rdramReadBit8(addr: number, bitoffset: number): boolean {
         return Memory.readBitU8(addr, bitoffset);
@@ -54,9 +56,11 @@ export class DolphinMemory implements IMemory {
     }
     // @Sylvain - writeBitsU8 appears to be broken.
     rdramWriteBits8(addr: number, buf: Buffer): void {
-        let arr = [...buf];
-        let b = bitwise.byte.write(arr as any);
-        this.rdramWrite8(addr, b);
+        /*         let arr = [...buf];
+                let b = bitwise.byte.write(arr as any);
+                this.rdramWrite8(addr, b); */
+
+        Memory.writeBitsU8(addr, buf);
     }
     rdramWriteBit8(addr: number, bitoffset: number, bit: boolean): void {
         Memory.writeBitU8(addr, bitoffset, bit);

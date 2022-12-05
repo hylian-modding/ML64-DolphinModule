@@ -3,17 +3,16 @@
 
 
 "dolphin-js@https://framboise-jaune.fr/artifacts/ml64/dolphin-js":
-  version "1.0.0-e156648"
-  resolved "https://framboise-jaune.fr/artifacts/ml64/dolphin-js#336234724c1f2bd937a9c54b49fc2a9dd70cbea4"
+  "integrity" "sha512-LJkoJyD9oQSwcH2u9heSEcRqhQ6pn7O9YKmbF0WKQW5byGQPxKxE+rc7nXeUnfcJo0nQ4rpICFh9AH8oUZrSBg=="
+  "resolved" "https://framboise-jaune.fr/artifacts/ml64/dolphin-js"
+  "version" "1.0.1-4a3034a"
 
 "dolphin-plugin@https://framboise-jaune.fr/artifacts/ml64/dolphin-plugin":
-  version "1.0.0-88ca284"
-  resolved "https://framboise-jaune.fr/artifacts/ml64/dolphin-plugin#60f4919031d898b4bf838926c87cfb04c4065ed7"
+  "integrity" "sha512-Yv5R1mxtULUIGprBvNYrkKwG3qP1uhA1pvd//6JRb+52Z/BMzQiY3Go0h+Ofa4jbCV7iigJcHmbjyA+TTupm/w=="
+  "resolved" "https://framboise-jaune.fr/artifacts/ml64/dolphin-plugin"
+  "version" "1.0.0-88ca284"
 
 "ml64tk@https://framboise-jaune.fr/artifacts/ml64/ml64tk":
-  version "1.1.0-6112ffe"
-  resolved "https://framboise-jaune.fr/artifacts/ml64/ml64tk#1061c733675c824d957b5413d468d94b9c024dbc"
-
-"ml64tk@https://github.com/hylian-modding/ml64tk-v1":
-  version "1.0.0"
-  resolved "https://github.com/hylian-modding/ml64tk-v1#df1f38fc1c5c79568da0321a3752c0ea956b2274"
+  "integrity" "sha512-N5DhOpLXuWDNgtWyalJdegESuzdY6ijFa1quVmKos2ReEIPBdumyWgGhxlwzrP/YTQmJNsU0XwWCW3PrQbhfSg=="
+  "resolved" "https://framboise-jaune.fr/artifacts/ml64/ml64tk"
+  "version" "1.1.0-6112ffe"

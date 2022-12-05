@@ -93,7 +93,6 @@ export default class DolphinConsole implements IConsole {
     mem!: DolphinMemory;
     frame: number = 0;
     callbacks: Map<string, Array<Function>> = new Map<string, Array<Function>>();
-    letitrip: boolean = false;
     lobby: string;
 
     constructor(rom: string, logger: ILogger, lobby: string, config: IConfig) {
@@ -168,7 +167,7 @@ export default class DolphinConsole implements IConsole {
                 if (Core.isRunningAndStarted()) {
                     Core.doFrameStep();
                     this.frame++;
-                    if (this.callbacks.has(Emulator_Callbacks.new_frame) && this.letitrip) {
+                    if (this.callbacks.has(Emulator_Callbacks.new_frame) && this.frame > 1000) {
                         this.callbacks.get(Emulator_Callbacks.new_frame)!.forEach((fn: Function) => {
                             fn(this.frame);
                         });
@@ -201,11 +200,6 @@ export default class DolphinConsole implements IConsole {
                     '<a href="https://modloader64.com/">Website</a> <a href="https://discord.gg/nHb4fXX">Discord</a>');
             });
         }
-
-
-        setTimeout(() => {
-            this.letitrip = true;
-        }, 1000);
 
         return this.mem;
     }
