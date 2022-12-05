@@ -9,5 +9,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "compression": "zip"
+  "compression": "zip",
+  "dependencies": {
+    "dolphin-js": "https://framboise-jaune.fr/artifacts/ml64/dolphin-js",
+    "dolphin-plugin": "https://framboise-jaune.fr/artifacts/ml64/dolphin-plugin",
+    "ml64tk": "https://framboise-jaune.fr/artifacts/ml64/ml64tk"
+  }
 }

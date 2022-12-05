@@ -2,3 +2,18 @@
 # yarn lockfile v1
 
 
+"dolphin-js@https://framboise-jaune.fr/artifacts/ml64/dolphin-js":
+  version "1.0.0-e156648"
+  resolved "https://framboise-jaune.fr/artifacts/ml64/dolphin-js#336234724c1f2bd937a9c54b49fc2a9dd70cbea4"
+
+"dolphin-plugin@https://framboise-jaune.fr/artifacts/ml64/dolphin-plugin":
+  version "1.0.0-88ca284"
+  resolved "https://framboise-jaune.fr/artifacts/ml64/dolphin-plugin#60f4919031d898b4bf838926c87cfb04c4065ed7"
+
+"ml64tk@https://framboise-jaune.fr/artifacts/ml64/ml64tk":
+  version "1.1.0-6112ffe"
+  resolved "https://framboise-jaune.fr/artifacts/ml64/ml64tk#1061c733675c824d957b5413d468d94b9c024dbc"
+
+"ml64tk@https://github.com/hylian-modding/ml64tk-v1":
+  version "1.0.0"
+  resolved "https://github.com/hylian-modding/ml64tk-v1#df1f38fc1c5c79568da0321a3752c0ea956b2274"
