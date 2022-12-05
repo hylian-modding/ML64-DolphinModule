@@ -205,6 +205,9 @@ export default class DolphinConsole implements IConsole {
             });
         }
 
+        //@ts-ignore
+        this.rom = undefined;
+
         return this.mem;
     }
 
