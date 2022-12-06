@@ -46,6 +46,12 @@ export default class DolphinConsole implements IConsole {
         bus.on("DOLPHIN_ENABLE_PATCH", (evt: any) => {
             Util.enablePatch(new UICommon.GameFile(rom), evt);
         });
+        bus.on("DOLPHIN_ENABLE_GECKO", (evt: any) => {
+            Util.enableGeckoCode(new UICommon.GameFile(rom), evt);
+        });
+        bus.on("DOLPHIN_ENABLE_ARCODE", (evt: any) => {
+            Util.enableARCode(new UICommon.GameFile(rom), evt);
+        });
 
         if (global.ModLoader.hasOwnProperty("EXTRA_DATA")) {
             this.startInfo.isConfigure = global.ModLoader["EXTRA_DATA"].toUpperCase() === "TRUE";
