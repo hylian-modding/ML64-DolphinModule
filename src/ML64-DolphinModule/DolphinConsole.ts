@@ -27,8 +27,6 @@ import path from 'path';
 export default class DolphinConsole implements IConsole {
 
     startInfo: DolphinStartInfo = { isConfigure: false, gameFilePath: "" };
-    processUI: any;
-    processFrame: any;
     rom: Buffer;
     mem!: DolphinMemory;
     frame: number = 0;
@@ -67,6 +65,7 @@ export default class DolphinConsole implements IConsole {
 
         let hostWorker = new worker_threads.Worker(path.resolve(__dirname, "DolphinThread.js"), { workerData: this.startInfo });
         let processFrame: NodeJS.Timer;
+        let processUI: NodeJS.Timer;
 
         hostWorker.on('message', value => {
             if (value == 'hostGameStarted' && !this.startInfo.isConfigure) {
@@ -80,6 +79,11 @@ export default class DolphinConsole implements IConsole {
                         }
                     });
                 }, 1);
+
+                processUI = setInterval(() => {
+                    this.onNewFrame();
+                }, 16);
+
                 Dolphin.enableFrameHandler(true);
             }
         });
@@ -87,6 +91,7 @@ export default class DolphinConsole implements IConsole {
         hostWorker.on('exit', () => {
             if (!this.startInfo.isConfigure)
                 clearInterval(processFrame);
+                clearInterval(processUI);
                 bus.emit('SHUTDOWN_EVERYTHING', {});
                 setTimeout(()=>{
                     process.exit(0);
