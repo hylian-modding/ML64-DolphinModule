@@ -10,7 +10,7 @@ import { IImGui } from 'modloader64_api/Sylvain/ImGui';
 import { Input } from 'modloader64_api/Sylvain/Input';
 import { SDL } from 'modloader64_api/Sylvain/SDL';
 import { IYaz0 } from 'modloader64_api/Sylvain/Yaz0';
-import { Dolphin, Core, State, Util, UICommon } from 'dolphin-js';
+import { Dolphin, Core, State, Util, UICommon, Config, Gui } from 'dolphin-js';
 import { FakeRom } from 'modloader64_api/SidedProxy/FakeMemory';
 import { ILogger, IConfig } from 'modloader64_api/IModLoaderAPI';
 import fs from 'fs';
@@ -23,6 +23,8 @@ import { getDolphinLibraryPath } from './getDolphinLibraryPath';
 import { Emulator_Callbacks } from './Emulator_Callbacks';
 import worker_threads from 'worker_threads';
 import path from 'path';
+import { ImGuiAppImpl } from './ImGuiAppImpl';
+import { getDolphinUserDirectoryPath } from './getDolphinUserDirectoryPath';
 
 export default class DolphinConsole implements IConsole {
 
@@ -65,36 +67,85 @@ export default class DolphinConsole implements IConsole {
             libraryPath: getDolphinLibraryPath()
         });
 
-        let hostWorker = new worker_threads.Worker(path.resolve(__dirname, "DolphinThread.js"), { workerData: this.startInfo });
-        let processFrame: NodeJS.Timer;
+        let app: ImGuiAppImpl;
+        if (!this.startInfo.isConfigure) {
+            app = new ImGuiAppImpl();
+            app.run();
+        }
 
-        hostWorker.on('message', value => {
-            if (value == 'hostGameStarted' && !this.startInfo.isConfigure) {
-                processFrame = setInterval(() => {
-                    Dolphin.handleFrame(() => {
-                        // new frame
-                        if (this.callbacks.has(Emulator_Callbacks.new_frame)) {
-                            this.callbacks.get(Emulator_Callbacks.new_frame)!.forEach((fn: Function) => {
-                                fn(this.frame);
-                            });
-                        }
-                    });
-                }, 1);
-                Dolphin.enableFrameHandler(true);
-            }
+        Dolphin.startup({
+            applicationDisplayName: 'ModLoader64',
+            userDirectoryPath: getDolphinUserDirectoryPath()
+        }, () => {
+            Config.setBool('-MAIN_USE_PANIC_HANDLERS', false);
+            Config.setBool('-Main,Interface.PlayMode', !this.startInfo.isConfigure);
+            Config.setBool('-Main,Display.RenderToMain', !this.startInfo.isConfigure);
+            Config.setBool('-Main,Interface.HideFPSInfo', false);
         });
 
-        hostWorker.on('exit', () => {
-            if (!this.startInfo.isConfigure)
-                clearInterval(processFrame);
+        Gui.MainWindow.setIcon('assets/icon.png');
+        Gui.MainWindow.show();
+        Gui.Settings.setToolBarVisible(this.startInfo.isConfigure);
+        Gui.Settings.setDebugModeEnabled(false);
+
+        if (!this.startInfo.isConfigure) {
+            let debugMenu = Gui.MainWindow.getMenuBar().addMenu('Debug');
+            let toggleImGuiAction = debugMenu.addAction('ImGui');
+            toggleImGuiAction.checkable = true;
+            toggleImGuiAction.setToggledCallback((c) => {
+                if (c) app.show();
+                else app.hide();
+            });
+            toggleImGuiAction.checked = false;
+            toggleImGuiAction.setShortcut('Ctrl+I');
+            // @ts-ignore
+            app.setToggleImGuiAction(toggleImGuiAction);
+        }
+
+        let helpMenu = Gui.MainWindow.findMenu('Help');
+        if (helpMenu) {
+            let aboutAction = helpMenu.addAction('About ModLoader64');
+            aboutAction.setTriggeredCallback(() => {
+                Gui.Q.CommonDialogs.about(Gui.MainWindow.asWidget(), 'About ModLoader64',
+                    'ModLoader64 is a network capable mod loading system for Nintendo 64 and GameCube games.<br/>' +
+                    'Its main purpose is creating online multiplayer mods for various games like Ocarina of Time.<br/>' +
+                    '<a href="https://modloader64.com/">Website</a> <a href="https://discord.gg/nHb4fXX">Discord</a>');
+            });
+        }
+
+        if (!this.startInfo.isConfigure)
+            Gui.MainWindow.startGame(this.startInfo.gameFilePath!);
+
+        const processFrame = setInterval(() => {
+            Dolphin.handleFrame(() => {
+                // new frame
+                if (this.callbacks.has(Emulator_Callbacks.new_frame)) {
+                    this.callbacks.get(Emulator_Callbacks.new_frame)!.forEach((fn: Function) => {
+                        fn(this.frame);
+                    });
+                }
+            });
+        }, 1);
+
+        Dolphin.enableFrameHandler(true);
+        const processUI = setInterval(() => {
+            Dolphin.processOne();
+            if (Gui.Application.hasExited()) {
+                clearInterval(processUI);
+                if (!this.startInfo.isConfigure) {
+                    app.close();
+                    Dolphin.enableFrameHandler(false);
+                }
+                Dolphin.shutdown();
+
+                if (!this.startInfo.isConfigure)
+                    clearInterval(processFrame);
                 bus.emit('SHUTDOWN_EVERYTHING', {});
-                setTimeout(()=>{
+                setTimeout(() => {
                     process.exit(0);
                 }, 3000);
-        });
-
-        process.removeAllListeners('message');
-
+            }
+        }, 16);
 
         //@ts-ignore
         this.rom = undefined;
