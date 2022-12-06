@@ -10,10 +10,11 @@ import { IImGui } from 'modloader64_api/Sylvain/ImGui';
 import { Input } from 'modloader64_api/Sylvain/Input';
 import { SDL } from 'modloader64_api/Sylvain/SDL';
 import { IYaz0 } from 'modloader64_api/Sylvain/Yaz0';
-import { Dolphin, Core, State, Util, UICommon, Config, Gui } from 'dolphin-js';
+import { Dolphin, Core, State, Util, UICommon, Config, Gui, Enums } from 'dolphin-js';
 import { FakeRom } from 'modloader64_api/SidedProxy/FakeMemory';
 import { ILogger, IConfig } from 'modloader64_api/IModLoaderAPI';
 import fs from 'fs';
+import path from 'path';
 import { GCRomHeader } from './GCRomHeader';
 import { DolphinMemory } from './DolphinMemory';
 import { bus } from 'modloader64_api/EventHandler';
@@ -85,6 +86,7 @@ export default class DolphinConsole implements IConsole {
             applicationDisplayName: 'ModLoader64',
             userDirectoryPath: getDolphinUserDirectoryPath()
         }, () => {
+            Config.setString('@GCIPathOverride', Enums.ExpansionInterface.Slot.A, path.resolve(`./saves/${this.lobby}`));
             Config.setBool('-MAIN_USE_PANIC_HANDLERS', false);
             Config.setBool('-Main,Interface.PlayMode', !this.startInfo.isConfigure);
             Config.setBool('-Main,Display.RenderToMain', !this.startInfo.isConfigure);
