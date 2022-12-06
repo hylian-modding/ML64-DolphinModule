@@ -100,6 +100,9 @@ export default class DolphinConsole implements IConsole {
             toggleImGuiAction.setShortcut('Ctrl+I');
             // @ts-ignore
             app.setToggleImGuiAction(toggleImGuiAction);
+            // @ts-ignore
+            app.framecallback = this.onNewFrame.bind(this);
+
         }
 
         let helpMenu = Gui.MainWindow.findMenu('Help');
@@ -131,9 +134,6 @@ export default class DolphinConsole implements IConsole {
         Dolphin.enableFrameHandler(true);
         const processUI = setInterval(() => {
             Dolphin.processOne();
-            if (this.frame > 1000){
-                this.onNewFrame();
-            }
             if (Gui.Application.hasExited()) {
                 clearInterval(processUI);
                 if (!this.startInfo.isConfigure) {

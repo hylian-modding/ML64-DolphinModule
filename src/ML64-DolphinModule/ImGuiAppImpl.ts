@@ -5,6 +5,7 @@ import { ImGui } from 'ml64tk';
 export class ImGuiAppImpl extends ImGuiApp {
     private toggleImGuiAction!: Gui.Q.Action;
     private mem1View = new ImGui.MemoryEditor();
+    framecallback: Function | undefined;
 
     constructor() {
         super('ImGui', true);
@@ -17,6 +18,8 @@ export class ImGuiAppImpl extends ImGuiApp {
     onNewFrame() {
         const mem1 = AddressSpace.get(AddressSpace.Type.Mem1);
         this.mem1View.drawWindow('Mem1', mem1, mem1.byteLength);
+
+        if (this.framecallback !== undefined) this.framecallback();
     }
 
     onClose() {
