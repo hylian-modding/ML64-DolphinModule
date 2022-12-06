@@ -21,8 +21,6 @@ import { ImGui } from 'ml64tk';
 import { DolphinStartInfo } from './DolphinStartInfo';
 import { getDolphinLibraryPath } from './getDolphinLibraryPath';
 import { Emulator_Callbacks } from './Emulator_Callbacks';
-import worker_threads from 'worker_threads';
-import path from 'path';
 import { ImGuiAppImpl } from './ImGuiAppImpl';
 import { getDolphinUserDirectoryPath } from './getDolphinUserDirectoryPath';
 
@@ -48,6 +46,10 @@ export default class DolphinConsole implements IConsole {
         bus.on("DOLPHIN_ENABLE_PATCH", (evt: any) => {
             Util.enablePatch(new UICommon.GameFile(rom), evt);
         });
+
+        if (global.ModLoader.hasOwnProperty("EXTRA_DATA")) {
+            this.startInfo.isConfigure = global.ModLoader["EXTRA_DATA"].toUpperCase() === "TRUE";
+        }
 
     }
 
