@@ -130,6 +130,7 @@ export default class DolphinConsole implements IConsole {
         Dolphin.enableFrameHandler(true);
         const processUI = setInterval(() => {
             Dolphin.processOne();
+            this.onNewFrame();
             if (Gui.Application.hasExited()) {
                 clearInterval(processUI);
                 if (!this.startInfo.isConfigure) {
