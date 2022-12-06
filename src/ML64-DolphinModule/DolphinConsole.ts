@@ -119,6 +119,7 @@ export default class DolphinConsole implements IConsole {
         const processFrame = setInterval(() => {
             Dolphin.handleFrame(() => {
                 // new frame
+                this.frame++;
                 if (this.callbacks.has(Emulator_Callbacks.new_frame)) {
                     this.callbacks.get(Emulator_Callbacks.new_frame)!.forEach((fn: Function) => {
                         fn(this.frame);
@@ -130,7 +131,9 @@ export default class DolphinConsole implements IConsole {
         Dolphin.enableFrameHandler(true);
         const processUI = setInterval(() => {
             Dolphin.processOne();
-            this.onNewFrame();
+            if (this.frame > 1000){
+                this.onNewFrame();
+            }
             if (Gui.Application.hasExited()) {
                 clearInterval(processUI);
                 if (!this.startInfo.isConfigure) {
