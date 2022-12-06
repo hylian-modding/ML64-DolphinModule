@@ -10,9 +10,7 @@ import { IImGui } from 'modloader64_api/Sylvain/ImGui';
 import { Input } from 'modloader64_api/Sylvain/Input';
 import { SDL } from 'modloader64_api/Sylvain/SDL';
 import { IYaz0 } from 'modloader64_api/Sylvain/Yaz0';
-import { Dolphin, Config, Core, Gui, AddressSpace, State, Enums, Util, UICommon } from 'dolphin-js';
-import { ImGuiApp } from './ImGuiApp';
-import path from 'path';
+import { Dolphin, Core, State, Util, UICommon } from 'dolphin-js';
 import { FakeRom } from 'modloader64_api/SidedProxy/FakeMemory';
 import { ILogger, IConfig } from 'modloader64_api/IModLoaderAPI';
 import fs from 'fs';
@@ -20,69 +18,11 @@ import { GCRomHeader } from './GCRomHeader';
 import { DolphinMemory } from './DolphinMemory';
 import { bus } from 'modloader64_api/EventHandler';
 import { ImGui } from 'ml64tk';
-
-class ImGuiAppImpl extends ImGuiApp {
-    private toggleImGuiAction!: Gui.Q.Action;
-    private mem1View = new ImGui.MemoryEditor();
-
-    viCallback!: Function;
-
-    constructor() {
-        super('ImGui', true);
-    }
-
-    onInit() {
-        ImGui.getIO().iniFilename = 'data/dolphin_imgui.ini';
-    }
-
-    onNewFrame() {
-        const mem1 = AddressSpace.get(AddressSpace.Type.Mem1);
-        this.mem1View.drawWindow('Mem1', mem1, mem1.byteLength);
-
-        this.viCallback();
-    }
-
-    onClose() {
-        this.toggleImGuiAction.checked = false;
-        return !Core.isRunningAndStarted();
-    }
-
-    setToggleImGuiAction(a: Gui.Q.Action) {
-        this.toggleImGuiAction = a;
-    }
-
-    show() {
-        this.appWindow.show();
-    }
-
-    hide() {
-        this.appWindow.hide();
-    }
-
-    close() {
-        this.appWindow.close();
-    }
-}
-
-export interface DolphinStartInfo {
-    isConfigure: boolean;
-    gameFilePath?: string;
-}
-
-export function getDolphinLibraryPath() {
-    return path.join(__dirname, 'node_modules', 'dolphin-plugin')
-}
-
-export function getDolphinUserDirectoryPath() {
-    return path.resolve(process.cwd(), './data/dolphin');
-}
-
-export const enum Emulator_Callbacks {
-    new_frame = "new-frame",
-    core_started = "core-started",
-    vi_update = "vi-update",
-    create_resources = "create-resources"
-}
+import { DolphinStartInfo } from './DolphinStartInfo';
+import { getDolphinLibraryPath } from './getDolphinLibraryPath';
+import { Emulator_Callbacks } from './Emulator_Callbacks';
+import worker_threads from 'worker_threads';
+import path from 'path';
 
 export default class DolphinConsole implements IConsole {
 
@@ -103,7 +43,7 @@ export default class DolphinConsole implements IConsole {
 
         this.mem = new DolphinMemory();
 
-        bus.on("DOLPHIN_ENABLE_PATCH", (evt: any)=>{
+        bus.on("DOLPHIN_ENABLE_PATCH", (evt: any) => {
             Util.enablePatch(new UICommon.GameFile(rom), evt);
         });
 
@@ -125,85 +65,36 @@ export default class DolphinConsole implements IConsole {
             libraryPath: getDolphinLibraryPath()
         });
 
-        let app: ImGuiAppImpl;
-        if (!this.startInfo.isConfigure) {
-            app = new ImGuiAppImpl();
-            app.viCallback = this.onNewFrame.bind(this);
-            app.run();
-        }
+        let hostWorker = new worker_threads.Worker(path.resolve(__dirname, "DolphinThread.js"), { workerData: this.startInfo });
+        let processFrame: NodeJS.Timer;
 
-        Dolphin.startup({
-            applicationDisplayName: 'ModLoader64',
-            userDirectoryPath: getDolphinUserDirectoryPath()
-        }, () => {
-            Config.setString('@GCIPathOverride', Enums.ExpansionInterface.Slot.A, path.resolve(`./saves/${this.lobby}`));
-            Config.setBool('-MAIN_USE_PANIC_HANDLERS', false);
-            Config.setBool('-Main,Interface.PlayMode', !this.startInfo.isConfigure);
-            Config.setBool('-Main,Display.RenderToMain', !this.startInfo.isConfigure);
-            Config.setBool('-Main,Interface.HideFPSInfo', !this.startInfo.isConfigure);
-        });
-        Gui.MainWindow.setIcon('assets/icon.png');
-
-        this.processUI = setInterval(() => {
-            Dolphin.processOne();
-            if (Gui.Application.hasExited()) {
-                if (!this.startInfo.isConfigure)
-                    clearInterval(this.processFrame);
-                clearInterval(this.processUI);
-                if (!this.startInfo.isConfigure)
-                    app.close();
-                Dolphin.shutdown();
-                bus.emit('SHUTDOWN_EVERYTHING', {});
-                setTimeout(() => {
-                    process.exit(0);
-                }, 3000);
+        hostWorker.on('message', value => {
+            if (value == 'hostGameStarted' && !this.startInfo.isConfigure) {
+                processFrame = setInterval(() => {
+                    Dolphin.handleFrame(() => {
+                        // new frame
+                        if (this.callbacks.has(Emulator_Callbacks.new_frame)) {
+                            this.callbacks.get(Emulator_Callbacks.new_frame)!.forEach((fn: Function) => {
+                                fn(this.frame);
+                            });
+                        }
+                    });
+                }, 1);
+                Dolphin.enableFrameHandler(true);
             }
         });
 
-        Gui.MainWindow.show();
-        Gui.Settings.setToolBarVisible(false);
-        Gui.Settings.setDebugModeEnabled(false);
+        hostWorker.on('exit', () => {
+            if (!this.startInfo.isConfigure)
+                clearInterval(processFrame);
+                bus.emit('SHUTDOWN_EVERYTHING', {});
+                setTimeout(()=>{
+                    process.exit(0);
+                }, 3000);
+        });
 
-        if (!this.startInfo.isConfigure) {
-            Gui.MainWindow.startGame(this.startInfo.gameFilePath!);
+        process.removeAllListeners('message');
 
-            this.processFrame = setInterval(() => {
-                if (Core.isRunningAndStarted()) {
-                    Core.doFrameStep();
-                    this.frame++;
-                    if (this.callbacks.has(Emulator_Callbacks.new_frame) && this.frame > 1000) {
-                        this.callbacks.get(Emulator_Callbacks.new_frame)!.forEach((fn: Function) => {
-                            fn(this.frame);
-                        });
-                    }
-                }
-            });
-        }
-
-        if (!this.startInfo.isConfigure) {
-            let debugMenu = Gui.MainWindow.getMenuBar().addMenu('Debug');
-            let toggleImGuiAction = debugMenu.addAction('ImGui');
-            toggleImGuiAction.checkable = true;
-            toggleImGuiAction.setToggledCallback((c) => {
-                if (c) app.show();
-                else app.hide();
-            });
-            toggleImGuiAction.checked = false;
-            toggleImGuiAction.setShortcut('Ctrl+I');
-            // @ts-ignore
-            app.setToggleImGuiAction(toggleImGuiAction);
-        }
-
-        let helpMenu = Gui.MainWindow.findMenu('Help');
-        if (helpMenu) {
-            let aboutAction = helpMenu.addAction('About ModLoader64');
-            aboutAction.setTriggeredCallback(() => {
-                Gui.Q.CommonDialogs.about(Gui.MainWindow.asWidget(), 'About ModLoader64',
-                    'ModLoader64 is a network capable mod loading system for Nintendo 64 and GameCube games.<br/>' +
-                    'Its main purpose is creating online multiplayer mods for various games like Ocarina of Time.<br/>' +
-                    '<a href="https://modloader64.com/">Website</a> <a href="https://discord.gg/nHb4fXX">Discord</a>');
-            });
-        }
 
         //@ts-ignore
         this.rom = undefined;
