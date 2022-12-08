@@ -93,6 +93,7 @@ export default class DolphinConsole implements IConsole {
             Config.setBool('-Main,Interface.HideFPSInfo', false);
         });
 
+        Gui.Settings.setCheatsEnabled(true);
         Gui.MainWindow.setIcon('assets/icon.png');
         Gui.MainWindow.show();
         Gui.Settings.setToolBarVisible(this.startInfo.isConfigure);
