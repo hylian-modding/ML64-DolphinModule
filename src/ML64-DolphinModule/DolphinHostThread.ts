@@ -1,7 +1,8 @@
 import worker_threads from 'worker_threads';
-import { Config, Dolphin, Gui } from 'dolphin-js';
+import { Config, Dolphin, Gui, Enums  } from 'dolphin-js';
 import { DolphinStartInfo } from './DolphinStartInfo';
 import { getDolphinUserDirectoryPath } from './getDolphinUserDirectoryPath';
+import path from 'path';
 
 const startInfo: DolphinStartInfo = worker_threads.workerData;
 
@@ -13,6 +14,7 @@ Dolphin.startup({
     Config.setBool('-Main,Interface.PlayMode', !startInfo.isConfigure);
     Config.setBool('-Main,Display.RenderToMain', !startInfo.isConfigure);
     Config.setBool('-Main,Interface.HideFPSInfo', false);
+    Config.setString('@GCIPathOverride', Enums.ExpansionInterface.Slot.A, path.resolve(`./saves/${startInfo.lobby}`));
 });
 
 const processUI = setInterval(() => {

@@ -28,7 +28,7 @@ import worker_threads from 'worker_threads';
 
 export default class DolphinConsole implements IConsole {
 
-    startInfo: DolphinStartInfo = { isConfigure: false, gameFilePath: "" };
+    startInfo: DolphinStartInfo = { isConfigure: false, gameFilePath: "", lobby: "" };
     rom: Buffer;
     mem!: DolphinMemory;
     frame: number = 0;
@@ -40,6 +40,7 @@ export default class DolphinConsole implements IConsole {
         this.startInfo.gameFilePath = rom;
 
         this.lobby = lobby;
+        this.startInfo.lobby = lobby;
 
         this.mem = new DolphinMemory();
 
