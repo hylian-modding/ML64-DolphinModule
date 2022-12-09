@@ -76,54 +76,50 @@ export default class DolphinConsole implements IConsole {
             Dolphin.loadLibrary({
                 libraryPath: getDolphinLibraryPath()
             });
-        
-            process.on('message', (startInfo: DolphinStartInfo) => {
-                const hostWorker = new worker_threads.Worker(path.join(__dirname, 'DolphinHostThread.js'), { workerData: startInfo });
-        
-                if (!startInfo.isConfigure) {
-                    const app = new ImGuiAppImpl();
-                    app.run();
-                    app.setHostWorker(hostWorker);
-        
-                    let processFrame: NodeJS.Timer;
-        
-                    hostWorker.on('message', value => {
-                        if (value.msg == 'hostReady') {
-                            processFrame = setInterval(() => {
-                                Dolphin.handleFrame(() => {
-                                    if (this.callbacks.has(Emulator_Callbacks.new_frame)) {
-                                        this.callbacks.get(Emulator_Callbacks.new_frame)!.forEach((fn: Function) => {
-                                            fn(this.frame);
-                                        });
-                                    }
-                                });
-                            }, 1);
-                            Dolphin.enableFrameHandler(true);
-                        }
-                        else if (value.msg == 'toggleImGuiVisibility') {
-                            const checked: boolean = value.data;
-                            if (checked) app.show();
-                            else app.hide();
-                        }
-                    });
-        
-                    hostWorker.on('exit', () => {
-                        if (!startInfo.isConfigure)
-                            clearInterval(processFrame);
-                        app.close();
-                        try{
-                            this.stopEmulator();
-                        }catch(err){
-                        }
-                        bus.emit('SHUTDOWN_EVERYTHING', {});
-                        setTimeout(() => {
-                            process.exit(0);
-                        }, 3000);
-                    });
-                }
-        
-                process.removeAllListeners('message');
-            });
+
+            const hostWorker = new worker_threads.Worker(path.join(__dirname, 'DolphinHostThread.js'), { workerData: this.startInfo });
+
+            if (!this.startInfo.isConfigure) {
+                const app = new ImGuiAppImpl();
+                app.run();
+                app.setHostWorker(hostWorker);
+
+                let processFrame: NodeJS.Timer;
+
+                hostWorker.on('message', value => {
+                    if (value.msg == 'hostReady') {
+                        processFrame = setInterval(() => {
+                            Dolphin.handleFrame(() => {
+                                if (this.callbacks.has(Emulator_Callbacks.new_frame)) {
+                                    this.callbacks.get(Emulator_Callbacks.new_frame)!.forEach((fn: Function) => {
+                                        fn(this.frame);
+                                    });
+                                }
+                            });
+                        }, 1);
+                        Dolphin.enableFrameHandler(true);
+                    }
+                    else if (value.msg == 'toggleImGuiVisibility') {
+                        const checked: boolean = value.data;
+                        if (checked) app.show();
+                        else app.hide();
+                    }
+                });
+
+                hostWorker.on('exit', () => {
+                    if (!this.startInfo.isConfigure)
+                        clearInterval(processFrame);
+                    app.close();
+                    try {
+                        this.stopEmulator();
+                    } catch (err) {
+                    }
+                    bus.emit('SHUTDOWN_EVERYTHING', {});
+                    setTimeout(() => {
+                        process.exit(0);
+                    }, 3000);
+                });
+            }
         }
 
         //@ts-ignore

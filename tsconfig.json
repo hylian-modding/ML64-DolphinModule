@@ -13,12 +13,6 @@
     "moduleResolution": "node",
     "baseUrl": "./",
     "paths": {
-      "@sound/*": [
-        "./build/emulator/*"
-      ],
-      "@ML64-DolphinModule/*": [
-        "./src/ML64-DolphinModule/*"
-      ]
     },
     "noImplicitAny": false
   },
