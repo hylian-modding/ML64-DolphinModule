@@ -6,7 +6,8 @@ import { ImGui } from 'ml64tk';
 export class ImGuiAppImpl extends ImGuiApp {
     private hostWorker!: worker_threads.Worker;
     private mem1View = new ImGui.MemoryEditor();
-    framecallback!: ()=>void;
+    framecallback!: () => void;
+    test!: Buffer;
 
     constructor() {
         super('ImGui', true);
@@ -20,8 +21,11 @@ export class ImGuiAppImpl extends ImGuiApp {
         if (!Core.isRunningAndStarted() || !this.appWindow.isVisible())
             return;
 
-        //const mem1 = AddressSpace.get(AddressSpace.Type.Mem1);
-        //this.mem1View.drawWindow('Mem1', mem1, mem1.byteLength);
+        if (this.test === undefined) {
+            this.test = Buffer.from(AddressSpace.get(AddressSpace.Type.Mem1));
+        } else {
+            this.mem1View.drawWindow('Mem1', this.test.buffer, this.test.buffer.byteLength);
+        }
 
         // new imgui frame
 
