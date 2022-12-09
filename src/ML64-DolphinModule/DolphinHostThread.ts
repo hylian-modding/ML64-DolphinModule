@@ -26,7 +26,7 @@ const processUI = setInterval(() => {
         Dolphin.shutdown();
         worker_threads.parentPort?.close();
     }
-}, 32);
+}, 16);
 
 Gui.MainWindow.setIcon('assets/icon.png');
 Gui.MainWindow.show();
