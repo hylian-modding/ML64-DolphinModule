@@ -1,11 +1,11 @@
 import { Core, Gui, AddressSpace } from 'dolphin-js';
 import { ImGuiApp } from './ImGuiApp';
+import worker_threads from 'worker_threads';
 import { ImGui } from 'ml64tk';
 
 export class ImGuiAppImpl extends ImGuiApp {
-    private toggleImGuiAction!: Gui.Q.Action;
+    private hostWorker!: worker_threads.Worker;
     private mem1View = new ImGui.MemoryEditor();
-    framecallback: Function | undefined;
 
     constructor() {
         super('ImGui', true);
@@ -16,19 +16,22 @@ export class ImGuiAppImpl extends ImGuiApp {
     }
 
     onNewFrame() {
+        if (!Core.isRunningAndStarted() || !this.appWindow.isVisible())
+            return;
+
         const mem1 = AddressSpace.get(AddressSpace.Type.Mem1);
         this.mem1View.drawWindow('Mem1', mem1, mem1.byteLength);
 
-        if (this.framecallback !== undefined) this.framecallback();
+        // new imgui frame
     }
 
     onClose() {
-        this.toggleImGuiAction.checked = false;
+        this.hostWorker.postMessage({ 'msg': 'notifyHideImGui' });
         return !Core.isRunningAndStarted();
     }
 
-    setToggleImGuiAction(a: Gui.Q.Action) {
-        this.toggleImGuiAction = a;
+    setHostWorker(w: worker_threads.Worker) {
+        this.hostWorker = w;
     }
 
     show() {
