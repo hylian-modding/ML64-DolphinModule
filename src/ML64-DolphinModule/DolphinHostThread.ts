@@ -32,6 +32,7 @@ Gui.MainWindow.setIcon('assets/icon.png');
 Gui.MainWindow.show();
 Gui.Settings.setToolBarVisible(startInfo.isConfigure);
 Gui.Settings.setDebugModeEnabled(false);
+Gui.Settings.setCheatsEnabled(true);
 
 if (!startInfo.isConfigure) {
     const debugMenu = Gui.MainWindow.getMenuBar().addMenu('Debug');
